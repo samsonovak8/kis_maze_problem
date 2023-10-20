@@ -6,8 +6,8 @@
 
 enum DIRECTION {
     LEFT,
-    RIGHT,
     UP,
+    RIGHT,
     BOTTOM
 };
 
@@ -39,24 +39,43 @@ std::pair<int, int> FireNextCell(int K, int direction, std::set<std::pair<int, i
     int current_position_x = K;
     int current_position_y = K;
 
-    // if (maze_piece[current_position_x + 1][current_position_y] == '_' && visited.find({current_position_x + 1, current_position_y}) == visited.end()) {            // если клетка справа свободна и не посещена
-    //     number_of_turns += CalcTurns(direction, RIGHT);
-    //     return {current_position_x + 1, current_position_y};
-    // }
-    // if (maze_piece[current_position_x][current_position_y + 1] == '_' && visited.find({current_position_x, current_position_y + 1}) == visited.end()) {            // если клетка справа свободна и не посещена
-    //     number_of_turns += CalcTurns(direction, UP);
-    //     return {current_position_x, current_position_y + 1};
-    // }
-    // if (maze_piece[current_position_x - 1][current_position_y] == '_' && visited.find({current_position_x - 1, current_position_y}) == visited.end()) {            // если клетка справа свободна и не посещена
-    //     number_of_turns += CalcTurns(direction, LEFT);
-    //     return {current_position_x - 1, current_position_y};
-    // }
-    // if (maze_piece[current_position_x][current_position_y - 1] == '_' && visited.find({current_position_x, current_position_y - 1}) == visited.end()) {            // если клетка справа свободна и не посещена
-    //     number_of_turns += CalcTurns(direction, BOTTOM);
-    //     return {current_position_x, current_position_y - 1};
-    // }
+    if (maze_piece[current_position_x + 1][current_position_y] == '_' && visited.find({current_position_x + 1, current_position_y}) == visited.end()) {            // если клетка справа свободна и не посещена
+        *number_of_turns = RIGHT - direction;
+        return {current_position_x + 1, current_position_y};
+    }
+    if (maze_piece[current_position_x][current_position_y + 1] == '_' && visited.find({current_position_x, current_position_y + 1}) == visited.end()) {            // если клетка справа свободна и не посещена
+        *number_of_turns = UP - direction;
+        return {current_position_x, current_position_y + 1};
+    }
+    if (maze_piece[current_position_x - 1][current_position_y] == '_' && visited.find({current_position_x - 1, current_position_y}) == visited.end()) {            // если клетка справа свободна и не посещена
+        *number_of_turns = LEFT - direction;
+        return {current_position_x - 1, current_position_y};
+    }
+    if (maze_piece[current_position_x][current_position_y - 1] == '_' && visited.find({current_position_x, current_position_y - 1}) == visited.end()) {            // если клетка справа свободна и не посещена
+        *number_of_turns = BOTTOM - direction;
+        return {current_position_x, current_position_y - 1};
+    }
     return {current_position_x, current_position_y};
 
+}
+
+void Turn(int* direction, int number_of_turns) {
+    if (number_of_turns == 0) {
+        return;
+    }
+
+    std::cout << "1, ";
+    if (number_of_turns >= 2) {                 // т.к. нужно совершить 2 или более поворотов по часовой стрелке, то выгоднее совершить (2 - кол-во поворотов) против часовой стрелки 
+        std::cout << 0 << '\n';
+    } else if (number_of_turns <= -2) {         // -- || -- против часовой, по часовой
+        std::cout << 1 << '\n';
+    } else if (number_of_turns == 1) {
+        std::cout << 1 << '\n';
+    } else {
+        std::cout << -1 << '\n';
+    }
+    
+    *direction = (*direction + number_of_turns) % 4;
 }
 
 int FindTotalTime(int x, int y, int x1, int y1, int A, int B, int C, int K) {
@@ -79,18 +98,18 @@ int FindTotalTime(int x, int y, int x1, int y1, int A, int B, int C, int K) {
 
         int number_of_turns = 0;
 
-        //std::pair<int, int> next_cell = FireNextCell(K, direction, visited, *number_of_turns);
+        std::pair<int, int> next_cell = FireNextCell(K, direction, visited, &number_of_turns);
 
         if (visited.find(next_cell) == visited.end()) {
-            positions.push(next_cell);
             
             // если данная клетка лабиринта не была посещена, то сделать поворот
-            time_spend += number_of_turns * B;
-            //Turn(number_of_turns);
+            time_spend += abs(number_of_turns) * B;
+            Turn(&direction, number_of_turns);
 
             // посетить данную клетку
             time_spend += A;
-            //Go();
+            visited.insert(next_cell);
+            positions.push(next_cell);
             continue;
         } 
         positions.pop();
