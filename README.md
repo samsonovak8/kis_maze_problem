@@ -6,7 +6,7 @@
 
 Задача 2
 
-Запустить решение g++ main.cpp
+Запустить решение g++ mminotavr_in_maze.cpp
 
 
 
